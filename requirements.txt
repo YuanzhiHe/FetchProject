@@ -1,0 +1,6 @@
+gymnasium-robotics==1.2.3
+mujoco==2.3.3
+sb3-contrib==2.2.1
+stable-baselines3==2.2.1
+pip~=22.0.2
+gymnasium~=0.29.1
