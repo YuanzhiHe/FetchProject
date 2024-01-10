@@ -14,13 +14,12 @@ env1 = Monitor(env1)
 env2 = Monitor(env2)
 
 model = TQC.load("./model/FetchReach_tqc_her2.pkl", env=env1)
-# model2 = TQC.load("./model/FetchPush_tqc_her.pkl", env=env2)
+model2 = TQC.load("./model/FetchPush_tqc_her.pkl", env=env2)
 
 
 model.policy.observation_space = env2.observation_space
-# model.policy.actor.latent_pi = model2.policy.actor.latent_pi
-# model.policy.actor.log_std.weight.data = torch.cat((model.policy.actor.log_std.weight.data, model.policy.actor.log_std.weight.data), 1)
-# model.policy.actor.mu.weight.data = torch.cat((model.policy.actor.mu.weight.data, model.policy.actor.mu.weight.data), 1)
+model.actor.latent_pi = model2.actor.latent_pi
+model.actor.mu = model2.actor.mu
 
 mean_reward, std_reward = evaluate_policy(model, env2, n_eval_episodes=10)
 
