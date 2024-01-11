@@ -16,7 +16,7 @@ model.tensorboard_log = "./tensorboard/FetchPushTest_TQC_HER-v2/"
 model.policy.observation_space = env.observation_space
 model.actor.latent_pi[0] = torch.nn.Linear(31, 512)
 
-model.learn(total_timesteps=1e3)
+model.learn(total_timesteps=1e6)
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, render=False)
 env.close()
 print(mean_reward, std_reward)
