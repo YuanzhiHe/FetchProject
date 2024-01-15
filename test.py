@@ -4,10 +4,10 @@ from sb3_contrib import TQC
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 
-env_name = "FetchReach-v2"
+env_name = "FetchPush-v2"
 env = gym.make(env_name, render_mode='human')
 env = Monitor(env)
-model = TQC.load("./model/FetchReach_tqc_her2.pkl", env=env)
+model = TQC.load("./model/FetchPush_tqc_her.pkl", env=env)
 
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
 env.close()
