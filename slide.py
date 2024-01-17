@@ -28,7 +28,7 @@ model = TQC(
     policy_kwargs=dict(net_arch=[512, 512, 512], n_critics=2),
     tensorboard_log="./tensorboard/FetchSlide_TQC_HER-v2/"
 )
-model.learn(total_timesteps=1e6)
+model.learn(total_timesteps=3e6)
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, render=False)
 env.close()
 print(mean_reward, std_reward)
