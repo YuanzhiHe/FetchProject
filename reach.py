@@ -5,7 +5,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 from stable_baselines3.common.evaluation import evaluate_policy
 
-env_name = "FetchReach-v2"
+env_name = "FetchReachDense-v2"
 env = gym.make(env_name)
 # env = DummyVecEnv([lambda: env])  # Vectorization, reducing time for future use
 env = Monitor(env)
@@ -27,10 +27,10 @@ model = TQC(
     learning_starts=1000,
     verbose=1,
     policy_kwargs=dict(net_arch=[512, 512, 512], n_critics=2),
-    tensorboard_log="./tensorboard/FetchReach_TQC_HER-v2/"
+    tensorboard_log="./tensorboard/FetchReachDense_TQC_HER-v2/"
 )
 model.learn(total_timesteps=20000)
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, render=False)
 env.close()
 print(mean_reward, std_reward)
-model.save("./model/FetchReach_tqc_her2.pkl")
+model.save("./model/FetchReachDense_tqc_her.pkl")

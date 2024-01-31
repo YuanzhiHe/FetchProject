@@ -7,38 +7,60 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 from stable_baselines3.common.evaluation import evaluate_policy
 
-env_name = "FetchPush-v2"
+env_name = "FetchPushDense-v2"
 env = gym.make(env_name)
-env2 = gym.make("FetchReach-v2")
+env2 = gym.make("FetchReachDense-v2")
 
-model = TQC.load("./model/FetchReach_tqc_her.pkl", env=env2)
+model = TQC.load("./model/FetchReachDense_tqc_her.pkl", env=env2)
 
 env = Monitor(env)
-model.tensorboard_log = "./tensorboard/FetchPushTest_TQC_HER-v2/"
+model.tensorboard_log = "./tensorboard/FetchPushTestDense_TQC_HER-v2/"
 model.policy.observation_space = env.observation_space
-model.actor.latent_pi[0] = torch.nn.Linear(31, 256)
+# model.tensorboard_log = None
+
+original_layer = model.actor.latent_pi[0]
+model.actor.latent_pi[0] = torch.nn.Linear(31, 512)
+model.actor.latent_pi[0].weight.data[:,:16] = original_layer.weight.data
+model.actor.latent_pi[0].bias.data = original_layer.bias.data
 env.num_envs = 1
 env = DummyVecEnv([lambda: env])
 model.env = env
 model.observation_space = env.observation_space
-model.critic.q_networks[0][0] = torch.nn.Linear(35, 256)
-model.critic.q_networks[1][0] = torch.nn.Linear(35, 256)
-model.critic_target.q_networks[0][0] = torch.nn.Linear(35, 256)
-model.critic_target.q_networks[1][0] = torch.nn.Linear(35, 256)
-tmp = np.squeeze(model.replay_buffer.observations['observation'])
-tmp = np.pad(tmp,((0,0),(0,15)))
-tmp = torch.from_numpy(tmp)
-tmp = torch.unsqueeze(tmp, 1)
-model.replay_buffer.observations['observation'] = tmp.numpy()
-tmp2 = np.squeeze(model.replay_buffer.next_observations['observation'])
-tmp2 = np.pad(tmp2,((0,0),(0,15)))
-tmp2 = torch.from_numpy(tmp2)
-tmp2 = torch.unsqueeze(tmp2, 1)
-model.replay_buffer.next_observations['observation'] = tmp2.numpy()
+
+original_first_layer = [model.critic.q_networks[0][0], model.critic.q_networks[1][0]]
+original_first_layer2 = [model.critic_target.q_networks[0][0], model.critic_target.q_networks[1][0]]
+model.critic.q_networks[0][0] = torch.nn.Linear(35, 512)
+model.critic.q_networks[1][0] = torch.nn.Linear(35, 512)
+model.critic_target.q_networks[0][0] = torch.nn.Linear(35, 512)
+model.critic_target.q_networks[1][0] = torch.nn.Linear(35, 512)
+model.critic.q_networks[0][0].weight.data[:,:20] = original_first_layer[0].weight.data
+model.critic.q_networks[1][0].weight.data[:,:20] = original_first_layer[1].weight.data
+model.critic_target.q_networks[0][0].weight.data[:,:20] = original_first_layer2[0].weight.data
+model.critic_target.q_networks[1][0].weight.data[:,:20] = original_first_layer2[1].weight.data
+model.critic.q_networks[0][0].bias.data = original_first_layer[0].bias.data
+model.critic.q_networks[1][0].bias.data = original_first_layer[1].bias.data
+model.critic_target.q_networks[0][0].bias.data = original_first_layer2[0].bias.data
+model.critic_target.q_networks[1][0].bias.data = original_first_layer2[1].bias.data
+
+# tmp = np.squeeze(model.replay_buffer.observations['observation'])
+# tmp = np.pad(tmp,((0,0),(0,15)))
+# tmp = torch.from_numpy(tmp)
+# tmp = torch.unsqueeze(tmp, 1)
+# model.replay_buffer.observations['observation'] = tmp.numpy()
+# tmp2 = np.squeeze(model.replay_buffer.next_observations['observation'])
+# tmp2 = np.pad(tmp2,((0,0),(0,15)))
+# tmp2 = torch.from_numpy(tmp2)
+# tmp2 = torch.unsqueeze(tmp2, 1)
+# model.replay_buffer.next_observations['observation'] = tmp2.numpy()
+model.replay_buffer.observations['observation'] = np.zeros((2000000,1,25))
+model.replay_buffer.next_observations['observation'] = np.zeros((2000000,1,25))
+
 model.verbose = 1
-model.learn(total_timesteps=1e6)
+model.learning_rate = 0.001
+
+# model.learn(total_timesteps=2e4)
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, render=False)
 env.close()
 print(mean_reward, std_reward)
-model.save("./model/FetchPushTest_tqc_her2.pkl")
+model.save("./model/FetchPushTestDense_tqc_her.pkl")
 print(datetime.datetime.now())
