@@ -1,10 +1,7 @@
 import datetime
 import gymnasium as gym
-import numpy as np
-import torch
 from sb3_contrib import TQC
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3 import HerReplayBuffer
 
@@ -33,19 +30,14 @@ model2 = TQC(
     tensorboard_log="./tensorboard/FetchSlideTest_TQC_HER-v2/"
 )
 
-
 original_first_layer = [model.critic.q_networks[0][0], model.critic.q_networks[1][0]]
-original_first_layer2 = [model.critic_target.q_networks[0][0], model.critic_target.q_networks[1][0]]
 model2.critic.q_networks[0][0].weight.data = original_first_layer[0].weight.data
 model2.critic.q_networks[1][0].weight.data = original_first_layer[1].weight.data
-model2.critic_target.q_networks[0][0].weight.data = original_first_layer2[0].weight.data
-model2.critic_target.q_networks[1][0].weight.data = original_first_layer2[1].weight.data
 model2.critic.q_networks[0][0].bias.data = original_first_layer[0].bias.data
 model2.critic.q_networks[1][0].bias.data = original_first_layer[1].bias.data
-model2.critic_target.q_networks[0][0].bias.data = original_first_layer2[0].bias.data
-model2.critic_target.q_networks[1][0].bias.data = original_first_layer2[1].bias.data
 
-model2.learn(total_timesteps=1e6)
+
+model2.learn(total_timesteps=3e6)
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, render=False)
 env.close()
 print(mean_reward, std_reward)

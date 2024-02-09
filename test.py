@@ -4,7 +4,7 @@ from sb3_contrib import TQC
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 
-env_name = "FetchSlideTest-v2"
+env_name = "FetchSlide-v2"
 # env = gym.make(env_name, render_mode='human')
 env = gym.make(env_name)
 env = Monitor(env)
