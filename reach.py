@@ -5,19 +5,18 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 from stable_baselines3.common.evaluation import evaluate_policy
 
-env_name = "FetchReach-v2"
+env_name = "FetchReachDense-v2"
 env = gym.make(env_name)
-# env = DummyVecEnv([lambda: env])  # Vectorization, reducing time for future use
 env = Monitor(env)
 model = TQC(
     env=env,
     policy='MultiInputPolicy',
-    replay_buffer_class=HerReplayBuffer,
-    # Parameters for HER
-    replay_buffer_kwargs=dict(
-        n_sampled_goal=4,
-        goal_selection_strategy='future',
-    ),
+    # replay_buffer_class=HerReplayBuffer,
+    # # Parameters for HER
+    # replay_buffer_kwargs=dict(
+    #     n_sampled_goal=4,
+    #     goal_selection_strategy='future',
+    # ),
     tau=0.05,
     ent_coef='auto',
     buffer_size=1000000,
@@ -33,4 +32,4 @@ model.learn(total_timesteps=20000)
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, render=False)
 env.close()
 print(mean_reward, std_reward)
-model.save("./model/FetchReach_tqc_her.pkl")
+model.save("./model/FetchReachDense_tqc.pkl")
