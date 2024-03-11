@@ -7,11 +7,10 @@ from stable_baselines3.common.evaluation import evaluate_policy
 env_name = "HandReach-v1"
 env = gym.make(env_name)
 env = Monitor(env)
-model = DDPG(
+model = TQC(
     env=env,
     policy='MultiInputPolicy',
     replay_buffer_class=HerReplayBuffer,
-    # Parameters for HER
     replay_buffer_kwargs=dict(
         n_sampled_goal=4,
         goal_selection_strategy='future',
@@ -19,10 +18,10 @@ model = DDPG(
     tau=0.05,
     buffer_size=1000000,
     batch_size=256,
-    # gamma=0.95,
+    gamma=0.95,
     learning_rate=0.001,
-    verbose=1,  # output log
-    policy_kwargs=dict(net_arch=[256, 256, 256]),
+    verbose=1,
+    policy_kwargs=dict(net_arch=[256, 256, 256], n_critics=2),
     tensorboard_log="./tensorboard/HandReach/"
 )
 
