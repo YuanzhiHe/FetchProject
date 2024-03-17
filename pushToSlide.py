@@ -15,7 +15,6 @@ model2 = TQC(
     env=env,
     policy='MultiInputPolicy',
     replay_buffer_class=HerReplayBuffer,
-    # Parameters for HER
     replay_buffer_kwargs=dict(
         n_sampled_goal=4,
         goal_selection_strategy='future',
@@ -25,7 +24,7 @@ model2 = TQC(
     batch_size=256,
     gamma=0.95,
     learning_rate=0.001,
-    verbose=1,  # output log
+    verbose=1,
     policy_kwargs=dict(net_arch=[512, 512, 512], n_critics=2),
     tensorboard_log="./tensorboard/FetchSlideTest_TQC_HER-v2/"
 )

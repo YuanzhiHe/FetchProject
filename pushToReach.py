@@ -1,29 +1,56 @@
 import gymnasium as gym
-import torch
 from sb3_contrib import TQC
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3 import HerReplayBuffer
 
 env_name1 = "FetchReach-v2"
-env1 = gym.make(env_name1)
+env = gym.make(env_name1)
 
 env_name2 = "FetchPush-v2"
-env2 = gym.make(env_name2, render_mode='human')
+env2 = gym.make(env_name2)
 
-env1 = Monitor(env1)
-env2 = Monitor(env2)
+env = Monitor(env)
 
-model = TQC.load("./model/FetchReach_tqc_her2.pkl", env=env1)
-model2 = TQC.load("./model/FetchPush_tqc_her.pkl", env=env2)
+model = TQC.load("./model/FetchPushTest_tqc_her.pkl", env=env2)
+model2 = TQC(
+    env=env,
+    policy='MultiInputPolicy',
+    replay_buffer_class=HerReplayBuffer,
+    replay_buffer_kwargs=dict(
+        n_sampled_goal=4,
+        goal_selection_strategy='future',
+    ),
+    tau=0.05,
+    ent_coef='auto',
+    buffer_size=1000000,
+    batch_size=256,
+    gamma=0.95,
+    learning_rate=0.001,
+    learning_starts=1000,
+    verbose=1,
+    policy_kwargs=dict(net_arch=[512, 512, 512], n_critics=2),
+    tensorboard_log="./tensorboard/FetchPushToReach_TQC_HER-v2/"
+)
 
 
-model2.policy.observation_space = env1.observation_space
-model2.actor.latent_pi = model.actor.latent_pi
-model2.actor.mu = model.actor.mu
+original_first_layer = [model.critic.q_networks[0][0], model.critic.q_networks[1][0]]
+model2.critic.q_networks[0][0].weight.data[:,:3] = original_first_layer[0].weight.data[:,:3]
+model2.critic.q_networks[0][0].weight.data[:,3:5] = original_first_layer[0].weight.data[:,9:11]
+model2.critic.q_networks[0][0].weight.data[:,5:10] = original_first_layer[0].weight.data[:,20:25]
+model2.critic.q_networks[0][0].weight.data[:,10:] = original_first_layer[0].weight.data[:,25:]
+model2.critic.q_networks[1][0].weight.data[:,:3] = original_first_layer[1].weight.data[:,:3]
+model2.critic.q_networks[1][0].weight.data[:,3:5] = original_first_layer[1].weight.data[:,9:11]
+model2.critic.q_networks[1][0].weight.data[:,5:10] = original_first_layer[1].weight.data[:,20:25]
+model2.critic.q_networks[1][0].weight.data[:,10:] = original_first_layer[1].weight.data[:,25:]
 
-mean_reward, std_reward = evaluate_policy(model2, env1, n_eval_episodes=10)
+model2.critic.q_networks[0][0].bias.data = original_first_layer[0].bias.data
+model2.critic.q_networks[1][0].bias.data = original_first_layer[1].bias.data
 
+model2.learn(total_timesteps=20000)
 
-env1.close()
-env2.close()
+mean_reward, std_reward = evaluate_policy(model2, env, n_eval_episodes=10, render=False)
+
+env.close()
 print(mean_reward, std_reward)
+model2.save("./model/FetchPushToReach2_tqc.pkl")
