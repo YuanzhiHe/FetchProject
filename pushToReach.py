@@ -12,7 +12,7 @@ env2 = gym.make(env_name2)
 
 env = Monitor(env)
 
-model = TQC.load("./model/FetchPushTest_tqc_her.pkl", env=env2)
+model = TQC.load("./model/FetchPush_tqc_her.pkl", env=env2)
 model2 = TQC(
     env=env,
     policy='MultiInputPolicy',
@@ -53,4 +53,4 @@ mean_reward, std_reward = evaluate_policy(model2, env, n_eval_episodes=10, rende
 
 env.close()
 print(mean_reward, std_reward)
-model2.save("./model/FetchPushToReach2_tqc.pkl")
+model2.save("./model/FetchPushToReach_tqc.pkl")
