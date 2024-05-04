@@ -9,7 +9,7 @@ env_name = "FetchSlide-v2"
 env = gym.make(env_name)
 env = Monitor(env)
 
-model = TQC.load("./model/FetchPickToSlide2_tqc.pkl", env=env)
+model = TQC.load("./model/FetchPushToSlide2_tqc.pkl", env=env)
 
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
 env.close()

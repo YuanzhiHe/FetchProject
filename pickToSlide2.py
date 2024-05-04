@@ -37,8 +37,8 @@ model2.critic.q_networks[1][0].bias.data = original_first_layer[1].bias.data
 
 
 model2.learn(total_timesteps=3e6)
-mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, render=False)
+mean_reward, std_reward = evaluate_policy(model2, env, n_eval_episodes=10, render=False)
 env.close()
 print(mean_reward, std_reward)
-model.save("./model/FetchPickToSlide2_tqc.pkl")
+model2.save("./model/FetchPickToSlide2_tqc.pkl")
 print(datetime.datetime.now())
